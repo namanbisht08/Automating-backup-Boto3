@@ -6,7 +6,6 @@ def delete_ami(ec2_client, name, date, delToday):
     try:
         describeImages = ec2_client.describe_images(Filters=[{'Name': 'tag:Name', 'Values': ['AMIBackup-' + name + "-" + delToday]}])['Images']
 
-        
         for image in describeImages:
             imageId = image['ImageId']
 
@@ -49,10 +48,10 @@ def lambda_handler(event, context):
                             }
         
         currentDT = datetime.datetime.now()
-        date = currentDT.strftime("%d-%m-%Y")
-        delDate = currentDT + datetime.timedelta(days=1)
-        delDate = delDate.strftime("%d-%m-%Y")
-        delToday = (currentDT - datetime.timedelta(days=1)).strftime("%d-%m-%Y")
+        date = currentDT.strftime("%d-%m-%Y")   #date toay
+        delDate = currentDT + datetime.timedelta(days=7)
+        delDate = delDate.strftime("%d-%m-%Y")  #deletion date, for mentioning on the tag (toady's date + 7)
+        delToday = (currentDT - datetime.timedelta(days=7)).strftime("%d-%m-%Y") #instance deleting today, used in describe_images in delete_ami function (today's date -7)
         
         
 
@@ -72,7 +71,7 @@ def lambda_handler(event, context):
                                 break
 
                         createImage = ec2_client.create_image(InstanceId=i.get('InstanceId', ''),
-                                                              Name="Lambda - " + i.get('InstanceId', '') + " from " + date + "(2 Days Backup)",
+                                                              Name="Lambda - " + i.get('InstanceId', '') + " from " + date + "(7 Days Backup)",
                                                               Description="Lambda created AMI of instance " + i.get('InstanceId', '') + " from " + date,
                                                               NoReboot=True, DryRun=False)
 
